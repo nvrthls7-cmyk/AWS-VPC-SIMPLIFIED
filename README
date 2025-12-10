@@ -1,0 +1,141 @@
+
+
+
+
+
+# AWS VPC Networking Architecture – Public & Private Subnets, NAT Gateway, NACL, Security Groups, IGW
+
+This repository contains a complete explanation of how traffic flows inside an AWS VPC using public and private subnets, including how the NAT Gateway, Internet Gateway, Route Tables, Network ACLs, Security Groups, and VPC Endpoints work together.
+
+The included diagram visualizes the entire architecture and packet flow.
+
+---
+
+## Architecture Components Overview
+
+### Public Subnet
+Contains:
+- NAT Gateway
+- Public EC2 or ALB
+- Public NACL
+
+Has a route to the Internet Gateway:
+0.0.0.0/0 → IGW
+
+### Private Subnet
+Contains:
+- Backend EC2 instances
+- Private NACL
+
+Cannot access the IGW directly.
+Uses NAT Gateway for outbound access:
+0.0.0.0/0 → NAT Gateway
+
+### NAT Gateway
+- Lives in the public subnet
+- Has a public IP
+- Used only by private subnets
+- Handles outbound internet traffic from private EC2
+- Never allows inbound traffic from internet
+
+### Internet Gateway (IGW)
+- Connects the VPC to the internet
+- Used by public subnets and NAT Gateway
+- Private subnets cannot use IGW directly
+
+### Route Tables
+Public Route Table:
+0.0.0.0/0 → IGW
+
+Private Route Table:
+0.0.0.0/0 → NAT Gateway
+
+Both route tables include:
+VPC-CIDR → local
+
+### Network ACL (NACL)
+- Stateless
+- Subnet-level firewall
+- Allows/Deny rules
+- Separate NACL for public and private subnets
+- Inbound + outbound must be explicitly allowed
+
+### Security Group (SG)
+- Stateful
+- Instance-level firewall
+- Automatically allows return traffic
+- Governs EC2 instance ports and access
+
+
+---
+
+## Traffic Flows
+
+### 1. INTERNET → PUBLIC Subnet (Inbound Request)
+User → Internet → IGW → Public Route Table → Public NACL → Public EC2/ALB → Application Response
+
+NAT is NOT used  
+Private subnet is NOT used  
+Traffic stays entirely in Public subnet  
+Response returns directly via IGW
+
+---
+
+### 2. PUBLIC → PRIVATE (Internal VPC Communication)
+Public Instance → Public NACL → local VPC route → Private NACL → Private Instance
+
+Uses local VPC routing  
+Does NOT use IGW  
+Does NOT use NAT  
+
+---
+
+### 3. PRIVATE → INTERNET (Outbound via NAT Gateway)
+Private EC2  
+→ Private Route Table  
+→ NAT Gateway (public subnet)  
+→ Public Route Table  
+→ IGW  
+→ Internet  
+
+Return Path:
+Internet → IGW → Public Route Table → NAT → Private EC2
+
+NAT is stateful and tracks connections  
+NAT always returns traffic to correct private instance
+
+---
+
+## Key Concepts
+
+- NAT lives in the public subnet  
+- IGW handles inbound/outbound for public subnet  
+- Private subnet never receives traffic directly from internet  
+- Route tables decide public vs private behavior  
+- NACL = stateless (must allow both directions)  
+- SG = stateful (allows responses automatically)  
+- Internal traffic uses local routing, not NAT or IGW
+
+---
+
+
+
+## How to Use This Repository
+1. Clone the repo
+2. View the diagram for complete architecture
+3. Use the README for explanation of flows
+
+---
+
+## Conclusion
+This architecture represents a production-grade AWS VPC design with:
+
+- Public and private subnets
+- Controlled outbound access via NAT
+- Secure inbound internet access via IGW
+- Strong subnet isolation using NACLs
+- Strong instance security using SGs
+- Private access to S3 via VPC Endpoint
+- Accurate traffic flows for inbound, outbound, and internal communication
+
+This is the most commonly used AWS networking pattern for scalable and secure applications.
