@@ -1,11 +1,4 @@
-![VPC Diagram](https://github.com/nvrthls7-cmyk/AWS-VPC-SIMPLIFIED/VPC.png)
-
-
-
-
-
-
-# AWS VPC Networking Architecture – Public & Private Subnets, NAT Gateway, NACL, Security Groups, IGW
+AWS VPC Networking Architecture – Public & Private Subnets, NAT Gateway, NACL, Security Groups, IGW
 
 This repository contains a complete explanation of how traffic flows inside an AWS VPC using public and private subnets, including how the NAT Gateway, Internet Gateway, Route Tables, Network ACLs, Security Groups, and VPC Endpoints work together.
 
